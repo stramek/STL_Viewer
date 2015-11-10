@@ -28,9 +28,7 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
     private static final String MESH_FILENAME =
-            "/Users/Stramek/Downloads/fillenium_malcon/Original-satellite-dish.stl";
-    // /Users/Stramek/Downloads/Perfect Diamond.STL
-    // /Users/Stramek/Downloads/fillenium_malcon/Original-satellite-dish.stl
+            "Original-satellite-dish.stl";
 
     private static final double MODEL_SCALE_FACTOR = 2; //400
     private static final double MODEL_X_OFFSET = -30; // standard
@@ -115,20 +113,19 @@ public class Main extends Application {
         double magnGamma = 0;
 
 
-        /*if(!(f[0] == 0)) {
-            norm = Math.sqrt(Math.pow(f[0], 2.0) + Math.pow(f[1], 2.0) + Math.pow(f[2], 2.0));
-            newRotation[1] = 0.8 * newRotation[1] + 0.2 * Math.toDegrees(Math.atan2(f[1], f[2]));
-            newRotation[0] = newRotation[0] * 0.8 - 0.2 * Math.toDegrees(Math.asin(f[0] / norm));
-        }
+        AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
+        newRotation[0] = aa.getAngle().getAlpha();
+        newRotation[1] = aa.getAngle().getBetta();
 
-        for (int i = 0; i < meshViews.length; i++) {
-            meshViews[i].getTransforms().add(new Rotate(-lastRotation[0], Rotate.Z_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(-lastRotation[1], Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(newRotation[1], Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(newRotation[0], Rotate.Z_AXIS));
+
+        /*for (int i = 0; i < meshViews.length; i++) {
+            meshViews[i].getTransforms().add(new Rotate(lastRotation[0], Rotate.Z_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(lastRotation[1], Rotate.X_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(-newRotation[1], Rotate.X_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(-newRotation[0], Rotate.Z_AXIS));
         }*/
 
-        if(!(f[0] == 0)) {
+        /*if(!(f[0] == 0)) {
             double s1 = Math.sin(newRotation[0]);
             double s2 = Math.sin(newRotation[1]);
             double c1 = Math.cos(newRotation[0]);
@@ -140,18 +137,18 @@ public class Main extends Application {
             accelBeta = Math.asin(f[0] / norm);
             accelAlpha = -Math.atan2(f[1], f[2]);
             magnGamma = Math.atan2((f[4] * c1) + (f[5] * s1), (f[3] * c2) + (f[4] * s1 * s2) - (f[5] * c1 * s2));
-            newRotation[0] = (K * (newRotation[0] + (gA[0] * dt))) + ((1 - K) * accelAlpha);
-            newRotation[1] = (K * (newRotation[1] + (gA[1] * dt))) + ((1 - K) * accelBeta);
-            newRotation[2] = (K * (newRotation[2] + (gA[2] * dt))) + ((1 - K) * magnGamma);
-        }
+            newRotation[0] = -Math.toDegrees((K * (Math.toRadians(-newRotation[0]) + (gA[0] * dt))) + ((1 - K) * accelAlpha));
+            newRotation[1] = -Math.toDegrees((K * (Math.toRadians(-newRotation[1]) + (gA[1] * dt))) + ((1 - K) * accelBeta));
+            newRotation[2] = -Math.toDegrees((K * (Math.toRadians(-newRotation[2]) + (gA[2] * dt))) + ((1 - K) * magnGamma));
+        }*/
 
         for (int i = 0; i < meshViews.length; i++) {
-            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[1]), Rotate.Z_AXIS));
-            //meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[2]), Rotate.Y_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[0]), Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(-Math.toDegrees(newRotation[0]), Rotate.X_AXIS));
-            //meshViews[i].getTransforms().add(new Rotate(-Math.toDegrees(newRotation[2]), Rotate.Y_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(-Math.toDegrees(newRotation[1]), Rotate.Z_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(-lastRotation[1], Rotate.Z_AXIS));
+            //meshViews[i].getTransforms().add(new Rotate(lastRotation[2], Rotate.Y_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(-lastRotation[0], Rotate.X_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(newRotation[0], Rotate.X_AXIS));
+            //meshViews[i].getTransforms().add(new Rotate(-newRotation[2], Rotate.Y_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(newRotation[1], Rotate.Z_AXIS));
         }
 
         lastRotation[0] = newRotation[0];

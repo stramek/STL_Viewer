@@ -103,52 +103,22 @@ public class Main extends Application {
 
     private void refreshValues(float[] f) {
 
-        double norm = 0;
+        //AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
+        //newRotation[0] = aa.getAngle().getAlpha();
+        //newRotation[1] = aa.getAngle().getBetta();
 
-        final double K = 0.99;
-        final double dt = 5 / 1000;
-        double[] gA = new double[3];
-        double accelBeta = 0;
-        double accelAlpha = 0;
-        double magnGamma = 0;
-
-
-        AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
-        newRotation[0] = aa.getAngle().getAlpha();
-        newRotation[1] = aa.getAngle().getBetta();
-
-
-        /*for (int i = 0; i < meshViews.length; i++) {
-            meshViews[i].getTransforms().add(new Rotate(lastRotation[0], Rotate.Z_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(lastRotation[1], Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(-newRotation[1], Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(-newRotation[0], Rotate.Z_AXIS));
-        }*/
-
-        /*if(!(f[0] == 0)) {
-            double s1 = Math.sin(newRotation[0]);
-            double s2 = Math.sin(newRotation[1]);
-            double c1 = Math.cos(newRotation[0]);
-            double c2 = Math.cos(newRotation[1]);
-            gA[0] = ((c2 * f[6]) + (s1 * s2 * f[7]) + (c1 * s2 * f[8]) + (c1 * s2 * f[8])) / c2;
-            gA[1] = ((c1 * c2 * f[7]) - (s1 * c2 * f[8])) / c2;
-            gA[2] = ((s1 * f[7]) + (c1 * f[8])) / c2;
-            norm = Math.sqrt(Math.pow(f[0], 2) + Math.pow(f[1], 2) + Math.pow(f[2], 2));
-            accelBeta = Math.asin(f[0] / norm);
-            accelAlpha = -Math.atan2(f[1], f[2]);
-            magnGamma = Math.atan2((f[4] * c1) + (f[5] * s1), (f[3] * c2) + (f[4] * s1 * s2) - (f[5] * c1 * s2));
-            newRotation[0] = -Math.toDegrees((K * (Math.toRadians(-newRotation[0]) + (gA[0] * dt))) + ((1 - K) * accelAlpha));
-            newRotation[1] = -Math.toDegrees((K * (Math.toRadians(-newRotation[1]) + (gA[1] * dt))) + ((1 - K) * accelBeta));
-            newRotation[2] = -Math.toDegrees((K * (Math.toRadians(-newRotation[2]) + (gA[2] * dt))) + ((1 - K) * magnGamma));
-        }*/
+        ComplementaryAlgorithm ca = new ComplementaryAlgorithm(f, newRotation);
+        newRotation[0] = ca.getAngle().getAlpha();
+        newRotation[1] = ca.getAngle().getBetta();
+        newRotation[2] = ca.getAngle().getGamma();
 
         for (int i = 0; i < meshViews.length; i++) {
-            meshViews[i].getTransforms().add(new Rotate(-lastRotation[1], Rotate.Z_AXIS));
-            //meshViews[i].getTransforms().add(new Rotate(lastRotation[2], Rotate.Y_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(-lastRotation[0], Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(newRotation[0], Rotate.X_AXIS));
-            //meshViews[i].getTransforms().add(new Rotate(-newRotation[2], Rotate.Y_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(newRotation[1], Rotate.Z_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[1]), Rotate.Z_AXIS));
+            //meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(-lastRotation[2]), Rotate.Y_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[0]), Rotate.X_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(-newRotation[0]), Rotate.X_AXIS));
+            //meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(newRotation[2]), Rotate.Y_AXIS));
+            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(-newRotation[1]), Rotate.Z_AXIS));
         }
 
         lastRotation[0] = newRotation[0];

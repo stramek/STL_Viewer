@@ -8,3 +8,6 @@
 *.class
 
 hs_err_pid1457.log
+.settings/org.eclipse.jdt.core.prefs
+.project
+.classpath

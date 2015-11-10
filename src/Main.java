@@ -173,6 +173,7 @@ public class Main extends Application {
         root.getChildren().add(pointLight2);
         root.getChildren().add(pointLight3);
         root.getChildren().add(ambient);
+        //fadfasd
 
         //final Text text1 = new Text(300, 300, getAddress());
         //text1.setFill(Color.WHITE);

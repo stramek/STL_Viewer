@@ -10,7 +10,8 @@ import java.nio.FloatBuffer;
 public class UDP implements Runnable {
 
     private static float[] values = new float[9];
-    private double time = 0;
+
+    public static boolean flag = true;
 
     @Override
     public void run() {
@@ -25,8 +26,7 @@ public class UDP implements Runnable {
             public void packetReceived( UdpServer.Event evt ) {
                 byte[] bytes = evt.getPacketAsBytes();
                 values = ByteArray2FloatArray(bytes);
-                System.out.println(System.currentTimeMillis() - time); // Drukuje czas wykonania funkcji packet Received
-                time = System.currentTimeMillis();
+                flag = true;
             }
         });
         us.start();

@@ -49,6 +49,8 @@ public class Main extends Application {
 
     private Group group;
 
+    private double time = 0;
+
     class Refresh implements Runnable {
         @Override
         public void run() {
@@ -65,7 +67,12 @@ public class Main extends Application {
                                     @Override
                                     public void run() {
                                         try {
-                                            refreshValues(UDP.getValues());
+                                            if (UDP.flag) {
+                                                refreshValues(UDP.getValues());
+                                                System.out.println(System.currentTimeMillis() - time);
+                                                time = System.currentTimeMillis();
+                                                UDP.flag = false;
+                                            }
                                         } finally {
                                             latch.countDown();
                                         }

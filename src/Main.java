@@ -67,11 +67,9 @@ public class Main extends Application {
                                     @Override
                                     public void run() {
                                         try {
-                                            if (UDP.flag) {
+                                            if (UDP.getFlag()) {
                                                 refreshValues(UDP.getValues());
-                                                System.out.println(System.currentTimeMillis() - time);
-                                                time = System.currentTimeMillis();
-                                                UDP.flag = false;
+                                                UDP.setFlag(false);
                                             }
                                         } finally {
                                             latch.countDown();
@@ -118,6 +116,9 @@ public class Main extends Application {
         newRotation[0] = ca.getRadian().getAlpha();
         newRotation[1] = ca.getRadian().getBetta();
         newRotation[2] = ca.getRadian().getGamma();
+
+        System.out.println(System.currentTimeMillis() - time);
+        time = System.currentTimeMillis();
 
 
         for (int i = 0; i < meshViews.length; i++) {

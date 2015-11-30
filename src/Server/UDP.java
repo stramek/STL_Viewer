@@ -11,11 +11,19 @@ public class UDP implements Runnable {
 
     private static float[] values = new float[9];
 
-    public static boolean flag = true;
+    private static boolean flag = false;
 
     @Override
     public void run() {
         host();
+    }
+
+    public static boolean getFlag() {
+        return flag;
+    }
+
+    public static void setFlag(boolean b) {
+        flag = b;
     }
 
     private void host() {

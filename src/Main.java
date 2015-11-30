@@ -3,6 +3,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
+import Algorithms.ComplementaryAlgorithm;
+import Server.UDP;
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 
 import javafx.application.Application;
@@ -19,8 +21,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -103,14 +103,15 @@ public class Main extends Application {
 
     private void refreshValues(float[] f) {
 
-        //AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
-        //newRotation[0] = aa.getAngle().getAlpha();
-        //newRotation[1] = aa.getAngle().getBetta();
+        /*AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
+        newRotation[0] = aa.getRadian().getAlpha();
+        newRotation[1] = aa.getRadian().getBetta();*/
 
         ComplementaryAlgorithm ca = new ComplementaryAlgorithm(f, newRotation);
-        newRotation[0] = ca.getAngle().getAlpha();
-        newRotation[1] = ca.getAngle().getBetta();
-        newRotation[2] = ca.getAngle().getGamma();
+        newRotation[0] = ca.getRadian().getAlpha();
+        newRotation[1] = ca.getRadian().getBetta();
+        newRotation[2] = ca.getRadian().getGamma();
+
 
         for (int i = 0; i < meshViews.length; i++) {
             meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[1]), Rotate.Z_AXIS));
@@ -173,7 +174,6 @@ public class Main extends Application {
         root.getChildren().add(pointLight2);
         root.getChildren().add(pointLight3);
         root.getChildren().add(ambient);
-        //fadfasd
 
         //final Text text1 = new Text(300, 300, getAddress());
         //text1.setFill(Color.WHITE);
@@ -208,7 +208,7 @@ public class Main extends Application {
         Scene scene = new Scene(group, VIEWPORT_SIZE, VIEWPORT_SIZE, true);
         scene.setFill(Color.rgb(10, 10, 40));
         addCamera(scene);
-        primaryStage.setTitle("Orientacja UDP");
+        primaryStage.setTitle("Orientacja Server.UDP");
         primaryStage.setScene(scene);
         primaryStage.show();
 

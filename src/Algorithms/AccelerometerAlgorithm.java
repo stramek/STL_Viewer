@@ -1,3 +1,7 @@
+package Algorithms;
+
+import Algorithms.Angles;
+
 /**
  * Created by Stramek on 10.11.2015.
  */
@@ -9,7 +13,7 @@ public class AccelerometerAlgorithm {
         this.values = values;
     }
 
-    public Angles getAngle() {
+    public Angles getRadian() {
 
         float alpha = 0;
         float betta = 0;

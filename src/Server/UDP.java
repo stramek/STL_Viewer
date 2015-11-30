@@ -1,3 +1,5 @@
+package Server;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -7,9 +9,8 @@ import java.nio.FloatBuffer;
 
 public class UDP implements Runnable {
 
-    private byte[] receiveData = new byte[4*9];
-    private DatagramSocket serverSocket;
     private static float[] values = new float[9];
+    private double time = 0;
 
     @Override
     public void run() {
@@ -17,25 +18,18 @@ public class UDP implements Runnable {
     }
 
     private void host() {
-        try {
-            serverSocket = new DatagramSocket(9876);
-            while(true) {
-                DatagramPacket receivePacket = new DatagramPacket(receiveData,receiveData.length);
-                serverSocket.receive(receivePacket);
-                byte[] bytes = receivePacket.getData();
+        UdpServer us = new UdpServer();
+        us.setPort(9876);
+        us.addUdpServerListener( new UdpServer.Listener() {
+            @Override
+            public void packetReceived( UdpServer.Event evt ) {
+                byte[] bytes = evt.getPacketAsBytes();
                 values = ByteArray2FloatArray(bytes);
+                System.out.println(System.currentTimeMillis() - time); // Drukuje czas wykonania funkcji packet Received
+                time = System.currentTimeMillis();
             }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        });
+        us.start();
     }
 
     public static float[] getValues() {

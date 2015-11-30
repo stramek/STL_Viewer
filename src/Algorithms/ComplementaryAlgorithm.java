@@ -1,3 +1,5 @@
+package Algorithms;
+
 /**
  * Created by Stramek on 10.11.2015.
  */
@@ -6,25 +8,23 @@ public class ComplementaryAlgorithm {
     private float[] values = new float[9];
     private double[] newRotation = new double[9];
 
+
     public ComplementaryAlgorithm(float[] values, double[] newRotation) {
         this.values = values;
-
         this.newRotation = newRotation;
-
-        /*for(int i = 0; i < this.newRotation.length; i++) {
-            this.newRotation[i] = Math.toRadians(newRotation[i]);
-        }*/
     }
 
-    public Angles getAngle() {
+    public Angles getRadian() {
 
         float alpha = 0;
         float betta = 0;
         float gamma = 0;
 
         double norm = 0;
-        final double K = 0.99;
-        final double dt = 33 / 1000;
+
+        final double K = 0;
+
+        final double dt = 10.0 / 1000.0;
         double[] gA = new double[3];
         double accelBeta = 0;
         double accelAlpha = 0;
@@ -42,9 +42,9 @@ public class ComplementaryAlgorithm {
             accelBeta = Math.asin(values[0] / norm);
             accelAlpha = -Math.atan2(values[1], values[2]);
             magnGamma = Math.atan2((values[4] * c1) + (values[5] * s1), (values[3] * c2) + (values[4] * s1 * s2) - (values[5] * c1 * s2));
-            newRotation[0] = K * newRotation[0] + gA[0] * dt + (1 - K) * accelAlpha;
-            newRotation[1] = K * newRotation[1] + gA[1] * dt + (1 - K) * accelBeta;
-            newRotation[2] = K * newRotation[2] + gA[2] * dt + (1 - K) * magnGamma;
+            newRotation[0] = K * (newRotation[0] + gA[0] * dt) + (1 - K) * accelAlpha;
+            newRotation[1] = K * (newRotation[1] + gA[1] * dt) + (1 - K) * accelBeta;
+            newRotation[2] = K * (newRotation[2] + gA[2] * dt) + (1 - K) * magnGamma;
         }
 
         alpha = (float) newRotation[0];

@@ -22,7 +22,7 @@ public class ComplementaryAlgorithm {
 
         double norm = 0;
 
-        final double K = 0.99;
+        final double K = 1;
 
         final double dt = 10.0 / 1000.0;
         double[] gA = new double[3];

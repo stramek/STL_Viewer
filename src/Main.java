@@ -3,6 +3,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
+import Algorithms.AccelerometerAlgorithm;
 import Algorithms.ComplementaryAlgorithm;
 import Server.UDP;
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
@@ -107,8 +108,8 @@ public class Main extends Application {
 
 
     private void refreshValues(float[] f) {
-
-        /*AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
+/*
+        AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
         newRotation[0] = aa.getRadian().getAlpha();
         newRotation[1] = aa.getRadian().getBetta();*/
 
@@ -117,8 +118,8 @@ public class Main extends Application {
         newRotation[1] = ca.getRadian().getBetta();
         newRotation[2] = ca.getRadian().getGamma();
 
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
+        //System.out.println(System.currentTimeMillis() - time);
+        //time = System.currentTimeMillis();
 
 
         for (int i = 0; i < meshViews.length; i++) {

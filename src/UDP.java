@@ -1,5 +1,3 @@
-package Server;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,35 +7,29 @@ import java.nio.FloatBuffer;
 
 public class UDP implements Runnable {
 
-    private static float[] values = new float[9];
-
-    private static boolean flag = false;
+    private byte[] receiveData = new byte[4*10];
+    private DatagramSocket serverSocket;
+    private static float[] values = new float[10];
 
     @Override
     public void run() {
         host();
     }
 
-    public static boolean getFlag() {
-        return flag;
-    }
-
-    public static void setFlag(boolean b) {
-        flag = b;
-    }
-
     private void host() {
-        UdpServer us = new UdpServer();
-        us.setPort(9876);
-        us.addUdpServerListener( new UdpServer.Listener() {
-            @Override
-            public void packetReceived( UdpServer.Event evt ) {
-                byte[] bytes = evt.getPacketAsBytes();
+        try {
+            serverSocket = new DatagramSocket(9876);
+            while(true) {
+                DatagramPacket receivePacket = new DatagramPacket(receiveData,receiveData.length);
+                serverSocket.receive(receivePacket);
+                byte[] bytes = receivePacket.getData();
                 values = ByteArray2FloatArray(bytes);
-                flag = true;
             }
-        });
-        us.start();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static float[] getValues() {

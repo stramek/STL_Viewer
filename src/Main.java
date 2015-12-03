@@ -2,10 +2,6 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
-
-import Algorithms.AccelerometerAlgorithm;
-import Algorithms.ComplementaryAlgorithm;
-import Server.UDP;
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 
 import javafx.application.Application;
@@ -47,6 +43,7 @@ public class Main extends Application {
 
     private double[] newRotation;
     private double[] lastRotation;
+    private int lastAlgorithm = 0;
 
     private Group group;
 
@@ -68,10 +65,10 @@ public class Main extends Application {
                                     @Override
                                     public void run() {
                                         try {
-                                            if (UDP.getFlag()) {
+                                            //if (UDP.getFlag()) {
                                                 refreshValues(UDP.getValues());
-                                                UDP.setFlag(false);
-                                            }
+                                             //   UDP.setFlag(false);
+                                            //}
                                         } finally {
                                             latch.countDown();
                                         }
@@ -108,32 +105,27 @@ public class Main extends Application {
 
 
     private void refreshValues(float[] f) {
-/*
-        AccelerometerAlgorithm aa = new AccelerometerAlgorithm(f);
-        newRotation[0] = aa.getRadian().getAlpha();
-        newRotation[1] = aa.getRadian().getBetta();*/
 
-        ComplementaryAlgorithm ca = new ComplementaryAlgorithm(f, newRotation);
-        newRotation[0] = ca.getRadian().getAlpha();
-        newRotation[1] = ca.getRadian().getBetta();
-        newRotation[2] = ca.getRadian().getGamma();
+        if(f[9] == 2 || f[9] == 3) {
 
-        //System.out.println(System.currentTimeMillis() - time);
-        //time = System.currentTimeMillis();
+            for (int i = 0; i < newRotation.length; i++) {
+                newRotation[i] = f[i];
+            }
 
-
-        for (int i = 0; i < meshViews.length; i++) {
-            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[1]), Rotate.Z_AXIS));
-            //meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(-lastRotation[2]), Rotate.Y_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(lastRotation[0]), Rotate.X_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(-newRotation[0]), Rotate.X_AXIS));
-            //meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(newRotation[2]), Rotate.Y_AXIS));
-            meshViews[i].getTransforms().add(new Rotate(Math.toDegrees(-newRotation[1]), Rotate.Z_AXIS));
+            for (int i = 0; i < meshViews.length; i++) {
+                meshViews[i].getTransforms().add(new Rotate(lastRotation[1], Rotate.Z_AXIS));
+                //meshViews[i].getTransforms().add(new Rotate(-lastRotation[2], Rotate.Y_AXIS));
+                meshViews[i].getTransforms().add(new Rotate(lastRotation[0], Rotate.X_AXIS));
+                meshViews[i].getTransforms().add(new Rotate(-newRotation[0], Rotate.X_AXIS));
+                //meshViews[i].getTransforms().add(new Rotate(newRotation[2], Rotate.Y_AXIS));
+                meshViews[i].getTransforms().add(new Rotate(-newRotation[1], Rotate.Z_AXIS));
+            }
         }
 
         lastRotation[0] = newRotation[0];
         lastRotation[1] = newRotation[1];
         lastRotation[2] = newRotation[2];
+        lastAlgorithm = (int) f[9];
     }
 
     static MeshView[] loadMeshViews() {
@@ -201,10 +193,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        lastRotation = new double[9];
+        lastRotation = new double[3];
         for(double d : lastRotation) d = 0;
 
-        newRotation = new double[9];
+        newRotation = new double[3];
         for(double d : newRotation) d = 0;
 
         group = buildScene();

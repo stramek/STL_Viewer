@@ -48,15 +48,13 @@ public class Main extends Application {
 
     private Group group;
 
-    private double time = 0;
-
-    private ScheduledFuture result;
+    public static int REFRESH_RATE = 15;
 
     class Refresh implements Runnable {
         @Override
         public void run() {
             ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-            result =  exec.scheduleAtFixedRate(new Runnable() {
+            exec.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
                     Service<Void> service = new Service<Void>() {
@@ -86,7 +84,7 @@ public class Main extends Application {
                     };
                     service.start();
                 }
-            }, 0, 15, TimeUnit.MILLISECONDS);
+            }, 0, REFRESH_RATE, TimeUnit.MILLISECONDS);
         }
     }
 

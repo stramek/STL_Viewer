@@ -1,7 +1,8 @@
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
+
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 
 import javafx.application.Application;
@@ -49,45 +50,43 @@ public class Main extends Application {
 
     private double time = 0;
 
+    private ScheduledFuture result;
+
     class Refresh implements Runnable {
         @Override
         public void run() {
-            while(true) {
-                Service<Void> service = new Service<Void>() {
-                    @Override
-                    protected Task<Void> createTask() {
-                        return new Task<Void>() {
-                            @Override
-                            protected Void call() throws Exception {
-                                //Background work
-                                final CountDownLatch latch = new CountDownLatch(1);
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            //if (UDP.getFlag()) {
+            ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+            result =  exec.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    Service<Void> service = new Service<Void>() {
+                        @Override
+                        protected Task<Void> createTask() {
+                            return new Task<Void>() {
+                                @Override
+                                protected Void call() throws Exception {
+                                    //Background work
+                                    final CountDownLatch latch = new CountDownLatch(1);
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
                                                 refreshValues(UDP.getValues());
-                                             //   UDP.setFlag(false);
-                                            //}
-                                        } finally {
-                                            latch.countDown();
+                                            } finally {
+                                                latch.countDown();
+                                            }
                                         }
-                                    }
-                                });
-                                latch.await();
-                                //Keep with the background work
-                                return null;
-                            }
-                        };
-                    }
-                };
-                service.start();
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                                    });
+                                    latch.await();
+                                    //Keep with the background work
+                                    return null;
+                                }
+                            };
+                        }
+                    };
+                    service.start();
                 }
-            }
+            }, 0, 15, TimeUnit.MILLISECONDS);
         }
     }
 

@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
+import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
@@ -99,8 +100,6 @@ public class Main extends Application {
         return IP.getHostAddress();
     }
 
-
-
     private void refreshValues(float[] f) {
 
         if(f[9] == 2 || f[9] == 3) {
@@ -111,12 +110,25 @@ public class Main extends Application {
 
             for (int i = 0; i < meshViews.length; i++) {
                 meshViews[i].getTransforms().add(new Rotate(lastRotation[1], Rotate.Z_AXIS));
-                //meshViews[i].getTransforms().add(new Rotate(-lastRotation[2], Rotate.Y_AXIS));
+                meshViews[i].getTransforms().add(new Rotate(-lastRotation[2], Rotate.Y_AXIS));
                 meshViews[i].getTransforms().add(new Rotate(lastRotation[0], Rotate.X_AXIS));
                 meshViews[i].getTransforms().add(new Rotate(-newRotation[0], Rotate.X_AXIS));
-                //meshViews[i].getTransforms().add(new Rotate(newRotation[2], Rotate.Y_AXIS));
+                meshViews[i].getTransforms().add(new Rotate(newRotation[2], Rotate.Y_AXIS));
                 meshViews[i].getTransforms().add(new Rotate(-newRotation[1], Rotate.Z_AXIS));
             }
+        }
+
+        if(f[9] == 4 || f[9] == 5) {
+
+            for (int i = 0; i < newRotation.length; i++) {
+                newRotation[i] = f[i];
+            }
+
+            for (int i = 0; i < meshViews.length; i++) {
+                meshViews[i].getTransforms().add(new Rotate(lastRotation[0], new Point3D(newRotation[1], newRotation[2], newRotation[3])));
+                meshViews[i].getTransforms().add(new Rotate(-newRotation[0], new Point3D(newRotation[1], newRotation[2], newRotation[3])));
+            }
+
         }
 
         lastRotation[0] = newRotation[0];
@@ -190,10 +202,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        lastRotation = new double[3];
+        lastRotation = new double[4];
         for(double d : lastRotation) d = 0;
 
-        newRotation = new double[3];
+        newRotation = new double[4];
         for(double d : newRotation) d = 0;
 
         group = buildScene();

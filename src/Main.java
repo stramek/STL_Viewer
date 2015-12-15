@@ -1,37 +1,35 @@
-import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.concurrent.*;
-
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
-import javafx.geometry.Point3D;
-import javafx.scene.AmbientLight;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.PointLight;
-import javafx.scene.Scene;
+import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class Main extends Application {
 
     private static final String MESH_FILENAME =
-            "Original-satellite-dish.stl";
+            "silnik.stl";
 
-    private static final double MODEL_SCALE_FACTOR = 2; //400
-    private static final double MODEL_X_OFFSET = -30; // standard
-    private static final double MODEL_Y_OFFSET = 0; // standard
+    private static final double MODEL_SCALE_FACTOR = 0.5; //2
+    private static final double MODEL_X_OFFSET = 0; // -30
+    private static final double MODEL_Y_OFFSET = 30; // standard
 
     private static final int VIEWPORT_SIZE = 800;
 
@@ -43,13 +41,20 @@ public class Main extends Application {
 
     private MeshView[] meshViews;
 
-    private double[] newRotation;
-    private double[] lastRotation;
-    private int lastAlgorithm = 0;
+    private double[] lastQuaternion;
 
     private Group group;
 
+    private boolean madgickAngle = true;
+
     public static int REFRESH_RATE = 15;
+
+    private final int RAW_DATA = 1;
+    private final int ACCELEROMETER = 2;
+    private final int COMPLEMENTARY = 3;
+    private final int MADGWICK = 4;
+    private final int MADGWICK_IMU = 5;
+    private final int MADGWICK_IMU_KAT = 6;
 
     class Refresh implements Runnable {
         @Override
@@ -101,40 +106,76 @@ public class Main extends Application {
     }
 
     private void refreshValues(float[] f) {
-
-        if(f[9] == 2 || f[9] == 3) {
-
-            for (int i = 0; i < newRotation.length; i++) {
-                newRotation[i] = f[i];
-            }
-
-            for (int i = 0; i < meshViews.length; i++) {
-                meshViews[i].getTransforms().add(new Rotate(lastRotation[1], Rotate.Z_AXIS));
-                meshViews[i].getTransforms().add(new Rotate(-lastRotation[2], Rotate.Y_AXIS));
-                meshViews[i].getTransforms().add(new Rotate(lastRotation[0], Rotate.X_AXIS));
-                meshViews[i].getTransforms().add(new Rotate(-newRotation[0], Rotate.X_AXIS));
-                meshViews[i].getTransforms().add(new Rotate(newRotation[2], Rotate.Y_AXIS));
-                meshViews[i].getTransforms().add(new Rotate(-newRotation[1], Rotate.Z_AXIS));
+        if(f[9] == ACCELEROMETER || f[9] == COMPLEMENTARY) {
+            for(MeshView meshView : meshViews) {
+                meshView.getTransforms().setAll(new Rotate(-f[0], Rotate.X_AXIS),
+                        new Rotate(f[1], Rotate.Y_AXIS)/*,
+                        new Rotate(-f[2], Rotate.Z_AXIS)*/);
             }
         }
 
-        if(f[9] == 4 || f[9] == 5) {
-
-            for (int i = 0; i < newRotation.length; i++) {
-                newRotation[i] = f[i];
+        if(f[9] == MADGWICK || f[9] == MADGWICK_IMU) {
+            for(MeshView meshView : meshViews) {
+                meshView.getTransforms().setAll(calculateAffine(f));
             }
-
-            for (int i = 0; i < meshViews.length; i++) {
-                meshViews[i].getTransforms().add(new Rotate(lastRotation[0], new Point3D(newRotation[1], newRotation[2], newRotation[3])));
-                meshViews[i].getTransforms().add(new Rotate(-newRotation[0], new Point3D(newRotation[1], newRotation[2], newRotation[3])));
-            }
-
         }
 
-        lastRotation[0] = newRotation[0];
-        lastRotation[1] = newRotation[1];
-        lastRotation[2] = newRotation[2];
-        lastAlgorithm = (int) f[9];
+        if(f[9] == MADGWICK_IMU_KAT) {
+            for(MeshView meshView : meshViews) {
+                meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(f), Rotate.Z_AXIS));
+            }
+        } else {
+            if(!madgickAngle)
+                madgickAngle = true;
+        }
+    }
+
+    private Affine calculateAffine(float[] quaternion) {
+        double[][] matrix = new double[3][3];
+        matrix[0][0] = 2 * Math.pow(quaternion[0], 2) - 1 + 2 * Math.pow(quaternion[1], 2);
+        matrix[0][1] = 2 * (quaternion[1] * quaternion[2] + quaternion[0] * quaternion[3]);
+        matrix[0][2] = 2 * (quaternion[1] * quaternion[3] - quaternion[0] * quaternion[2]);
+        matrix[1][0] = 2 * (quaternion[1] * quaternion[2] - quaternion[0] * quaternion[3]);
+        matrix[1][1] = 2 * Math.pow(quaternion[0], 2) - 1 + 2 * Math.pow(quaternion[2], 2);
+        matrix[1][2] = 2 * (quaternion[2] * quaternion[3] + quaternion[0] * quaternion[1]);
+        matrix[2][0] = 2 * (quaternion[1] * quaternion[3] + quaternion[0] * quaternion[2]);
+        matrix[2][1] = 2 * (quaternion[2] * quaternion[3] - quaternion[0] * quaternion[1]);
+        matrix[2][2] = 2 * Math.pow(quaternion[0], 2) - 1 + 2 * Math.pow(quaternion[3], 2);
+        matrix = trasposeMatrix(matrix);
+        return new Affine(-matrix[0][0], -matrix[0][1], -matrix[0][2], 0,
+                          matrix[1][0], matrix[1][1], matrix[1][2], 0,
+                          matrix[2][0], matrix[2][1], matrix[2][2], 0);
+    }
+
+    private double calculateAngleMotor(float[] quaternion) {
+        double quaternProd = (lastQuaternion[0] * quaternion[0]) -
+                (lastQuaternion[1] * -quaternion[1]) -
+                (lastQuaternion[2] * -quaternion[2]) -
+                (lastQuaternion[3] * -quaternion[3]);
+
+        if(madgickAngle) {
+            for (int i = 0; i < 4; i++) {
+                lastQuaternion[i] = quaternion[i];
+            }
+            madgickAngle = false;
+        }
+        //System.out.println(quaternProd);
+        //System.out.println("" + Math.toDegrees(2 * Math.acos(quaternProd)));
+        return Math.toDegrees(2 * Math.acos(quaternProd));
+    }
+
+    public static double[][] trasposeMatrix(double[][] matrix) {
+        int m = matrix.length;
+        int n = matrix[0].length;
+
+        double[][] trasposedMatrix = new double[n][m];
+
+        for(int x = 0; x < n; x++) {
+            for(int y = 0; y < m; y++) {
+                trasposedMatrix[x][y] = matrix[y][x];
+            }
+        }
+        return trasposedMatrix;
     }
 
     static MeshView[] loadMeshViews() {
@@ -185,10 +226,12 @@ public class Main extends Application {
         root.getChildren().add(pointLight3);
         root.getChildren().add(ambient);
 
-        //final Text text1 = new Text(300, 300, getAddress());
-        //text1.setFill(Color.WHITE);
-        //text1.setFont(Font.font(java.awt.Font.SERIF, 30));
-        //root.getChildren().add(text1);
+/*
+        final Text text1 = new Text(300, 300, getAddress());
+        text1.setFill(Color.WHITE);
+        text1.setFont(Font.font(java.awt.Font.SERIF, 30));
+        root.getChildren().add(text1);
+*/
 
         return root;
     }
@@ -202,18 +245,18 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        lastRotation = new double[4];
-        for(double d : lastRotation) d = 0;
+        lastQuaternion = new double[4];
+        for(double d : lastQuaternion) d = 0;
 
-        newRotation = new double[4];
-        for(double d : newRotation) d = 0;
+        lastQuaternion = new double[4];
+        for(double d : lastQuaternion) d = 0;
 
         group = buildScene();
         group.setScaleX(2);
         group.setScaleY(2);
         group.setScaleZ(2);
-        group.setTranslateX(50);
-        group.setTranslateY(50);
+        //group.setTranslateX(50);
+        //group.setTranslateY(50);
 
         Scene scene = new Scene(group, VIEWPORT_SIZE, VIEWPORT_SIZE, true);
         scene.setFill(Color.rgb(10, 10, 40));
@@ -241,8 +284,6 @@ public class Main extends Application {
 
         Thread tr = new Thread(new Refresh());
         tr.start();
-
-
     }
 
     public static void main(String[] args) {

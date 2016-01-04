@@ -47,7 +47,7 @@ public class Main extends Application {
 
     private boolean madgickAngle = true;
 
-    public static int REFRESH_RATE = 15;
+    public static int REFRESH_RATE = 20;
 
     private final int RAW_DATA = 1;
     private final int ACCELEROMETER = 2;
@@ -226,13 +226,6 @@ public class Main extends Application {
         root.getChildren().add(pointLight3);
         root.getChildren().add(ambient);
 
-/*
-        final Text text1 = new Text(300, 300, getAddress());
-        text1.setFill(Color.WHITE);
-        text1.setFont(Font.font(java.awt.Font.SERIF, 30));
-        root.getChildren().add(text1);
-*/
-
         return root;
     }
 
@@ -261,7 +254,7 @@ public class Main extends Application {
         Scene scene = new Scene(group, VIEWPORT_SIZE, VIEWPORT_SIZE, true);
         scene.setFill(Color.rgb(10, 10, 40));
         addCamera(scene);
-        primaryStage.setTitle("Orientacja Server.UDP");
+        primaryStage.setTitle("Orientacja STL");
         primaryStage.setScene(scene);
         primaryStage.show();
 

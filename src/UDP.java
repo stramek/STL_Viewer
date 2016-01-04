@@ -1,14 +1,12 @@
-import javafx.application.Platform;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class UDP implements Runnable {
 
@@ -31,7 +29,7 @@ public class UDP implements Runnable {
         exec.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                DatagramPacket receivePacket = new DatagramPacket(receiveData,receiveData.length);
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 try {
                     serverSocket.receive(receivePacket);
                 } catch (IOException e) {

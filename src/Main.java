@@ -1,3 +1,5 @@
+import algorithms.Algorithm;
+import algorithms.AlgorithmFactory;
 import com.interactivemesh.jfx.importer.stl.StlMeshImporter;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -52,9 +54,21 @@ public class Main extends Application {
     private final int RAW_DATA = 1;
     private final int ACCELEROMETER = 2;
     private final int COMPLEMENTARY = 3;
-    private final int MADGWICK = 4;
-    private final int MADGWICK_IMU = 5;
-    private final int MADGWICK_IMU_KAT = 6;
+    private final int MADGWICK_AMG = 4;
+    private final int MADGWICK_AG = 5;
+    private final int MADGWICK_AG_ANGLE = 6;
+
+    private final int COMPLEMENTARY_COMPUTER = 13;
+    private final int MADGWICK_AMG_COMPUTER = 14;
+    private final int MADGWICK_AG_COMPUTER = 15;
+    private final int MADGWICK_AG_ANGLE_COMPUTER = 16;
+
+    private AlgorithmFactory algorithmFactory = new AlgorithmFactory();
+
+    private final Algorithm accelerometer = algorithmFactory.getAlgorithm("ACCELEROMETER");
+    private final Algorithm complementary = algorithmFactory.getAlgorithm("COMPLEMENTARY");
+    private final Algorithm madgwickAMG = algorithmFactory.getAlgorithm("MADGWICKAMG");
+    private final Algorithm madgwickAG = algorithmFactory.getAlgorithm("MADGWICKAG");
 
     class Refresh implements Runnable {
         @Override
@@ -94,7 +108,6 @@ public class Main extends Application {
         }
     }
 
-
     private String getAddress() {
         InetAddress IP = null;
         try {
@@ -106,27 +119,68 @@ public class Main extends Application {
     }
 
     private void refreshValues(float[] f) {
-        if(f[9] == ACCELEROMETER || f[9] == COMPLEMENTARY) {
-            for(MeshView meshView : meshViews) {
-                meshView.getTransforms().setAll(new Rotate(-f[0], Rotate.X_AXIS),
-                        new Rotate(f[1], Rotate.Y_AXIS)/*,
-                        new Rotate(-f[2], Rotate.Z_AXIS)*/);
-            }
-        }
 
-        if(f[9] == MADGWICK || f[9] == MADGWICK_IMU) {
-            for(MeshView meshView : meshViews) {
-                meshView.getTransforms().setAll(calculateAffine(f));
-            }
-        }
+        float[] a;
 
-        if(f[9] == MADGWICK_IMU_KAT) {
-            for(MeshView meshView : meshViews) {
-                meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(f), Rotate.Z_AXIS));
-            }
-        } else {
-            if(!madgickAngle)
-                madgickAngle = true;
+        switch ((int)f[9]) {
+            case ACCELEROMETER:
+                for(MeshView meshView : meshViews) {
+                    a = accelerometer.calculate(f);
+                    meshView.getTransforms().setAll(new Rotate(a[0], Rotate.X_AXIS),
+                            new Rotate(a[1], Rotate.Y_AXIS));
+                }
+                break;
+            case COMPLEMENTARY:
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(new Rotate(-f[0], Rotate.X_AXIS),
+                            new Rotate(f[1], Rotate.Y_AXIS),
+                            new Rotate(-f[2], Rotate.Z_AXIS));
+                }
+                break;
+            case COMPLEMENTARY_COMPUTER:
+                a = complementary.calculate(f);
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(new Rotate(-a[0], Rotate.X_AXIS),
+                            new Rotate(a[1], Rotate.Y_AXIS),
+                            new Rotate(-a[2], Rotate.Z_AXIS));
+                }
+                break;
+            case MADGWICK_AMG:
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(calculateAffine(f));
+                }
+                break;
+            case MADGWICK_AG:
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(calculateAffine(f));
+                }
+                break;
+            case MADGWICK_AMG_COMPUTER:
+                a = madgwickAMG.calculate(f);
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(calculateAffine(a));
+                }
+                break;
+            case MADGWICK_AG_COMPUTER:
+                a = madgwickAG.calculate(f);
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(calculateAffine(a));
+                }
+                break;
+            case MADGWICK_AG_ANGLE:
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(f), Rotate.Z_AXIS));
+                }
+                break;
+            case MADGWICK_AG_ANGLE_COMPUTER:
+                a = madgwickAG.calculate(f);
+                for(MeshView meshView : meshViews) {
+                    meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(a), Rotate.Z_AXIS));
+                }
+                break;
+            default:
+                if(!madgickAngle)
+                    madgickAngle = true;
         }
     }
 
@@ -159,8 +213,6 @@ public class Main extends Application {
             }
             madgickAngle = false;
         }
-        //System.out.println(quaternProd);
-        //System.out.println("" + Math.toDegrees(2 * Math.acos(quaternProd)));
         return Math.toDegrees(2 * Math.acos(quaternProd));
     }
 
@@ -201,7 +253,6 @@ public class Main extends Application {
             sample.setSpecularColor(lightColor);
             sample.setSpecularPower(16);
             meshViews[i].setMaterial(sample);
-
         }
 
         pointLight = new PointLight(lightColor);

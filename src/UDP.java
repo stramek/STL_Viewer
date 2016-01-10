@@ -38,7 +38,7 @@ public class UDP implements Runnable {
                 byte[] bytes = receivePacket.getData();
                 values = ByteArray2FloatArray(bytes);
             }
-        }, 0, Main.REFRESH_RATE, TimeUnit.MILLISECONDS);
+        }, 0, 20, TimeUnit.MILLISECONDS);
     }
 
     public static float[] getValues() {

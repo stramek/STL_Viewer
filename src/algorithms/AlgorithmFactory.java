@@ -18,6 +18,8 @@ public class AlgorithmFactory {
             return new MadgwickAMG();
         } else if (algorithm.equalsIgnoreCase("MADGWICKAG")) {
             return new MadgwickAG();
+        } else if (algorithm.equalsIgnoreCase("MOTORANGLE")) {
+            return new MotorAngle();
         }
 
         return null;

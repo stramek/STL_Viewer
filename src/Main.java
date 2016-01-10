@@ -47,8 +47,6 @@ public class Main extends Application {
 
     private Group group;
 
-    public static int REFRESH_RATE = 20;
-
     private final int RAW_DATA = 1;
     private final int ACCELEROMETER = 2;
     private final int COMPLEMENTARY = 3;
@@ -67,6 +65,7 @@ public class Main extends Application {
     private final Algorithm complementary = algorithmFactory.getAlgorithm("COMPLEMENTARY");
     private final Algorithm madgwickAMG = algorithmFactory.getAlgorithm("MADGWICKAMG");
     private final Algorithm madgwickAG = algorithmFactory.getAlgorithm("MADGWICKAG");
+    private final Algorithm motorAngle = algorithmFactory.getAlgorithm("MOTORANGLE");
 
     class Refresh implements Runnable {
         @Override
@@ -102,7 +101,7 @@ public class Main extends Application {
                     };
                     service.start();
                 }
-            }, 0, REFRESH_RATE, TimeUnit.MILLISECONDS);
+            }, 0, 20, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -171,9 +170,9 @@ public class Main extends Application {
                 }
                 break;
             case MOTOR_ANGLE_COMPUTER:
-                a = madgwickAG.calculate(f);
+                a = motorAngle.calculate(f);
                 for(MeshView meshView : meshViews) {
-                    //meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(a), Rotate.Z_AXIS));
+                    meshView.getTransforms().setAll(new Rotate(a[0], Rotate.Z_AXIS));
                 }
                 break;
         }

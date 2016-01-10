@@ -5,7 +5,7 @@ public class Complementary implements Algorithm {
     private static final String TAG = "Complementary";
 
     private final double K = 0.98;
-    private final double dt = 20 / 1000.0;
+    private final double dt = 20.0 / 1000.0;
 
     private float[] newRotation;
     double[] gA;

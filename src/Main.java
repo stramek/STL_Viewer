@@ -47,8 +47,6 @@ public class Main extends Application {
 
     private Group group;
 
-    private boolean madgickAngle = true;
-
     public static int REFRESH_RATE = 20;
 
     private final int RAW_DATA = 1;
@@ -56,12 +54,12 @@ public class Main extends Application {
     private final int COMPLEMENTARY = 3;
     private final int MADGWICK_AMG = 4;
     private final int MADGWICK_AG = 5;
-    private final int MADGWICK_AG_ANGLE = 6;
+    private final int MOTOR_ANGLE = 6;
 
     private final int COMPLEMENTARY_COMPUTER = 13;
     private final int MADGWICK_AMG_COMPUTER = 14;
     private final int MADGWICK_AG_COMPUTER = 15;
-    private final int MADGWICK_AG_ANGLE_COMPUTER = 16;
+    private final int MOTOR_ANGLE_COMPUTER = 16;
 
     private AlgorithmFactory algorithmFactory = new AlgorithmFactory();
 
@@ -167,20 +165,17 @@ public class Main extends Application {
                     meshView.getTransforms().setAll(calculateAffine(a));
                 }
                 break;
-            case MADGWICK_AG_ANGLE:
+            case MOTOR_ANGLE:
                 for(MeshView meshView : meshViews) {
-                    meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(f), Rotate.Z_AXIS));
+                    meshView.getTransforms().setAll(new Rotate(f[0], Rotate.Z_AXIS));
                 }
                 break;
-            case MADGWICK_AG_ANGLE_COMPUTER:
+            case MOTOR_ANGLE_COMPUTER:
                 a = madgwickAG.calculate(f);
                 for(MeshView meshView : meshViews) {
-                    meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(a), Rotate.Z_AXIS));
+                    //meshView.getTransforms().setAll(new Rotate(calculateAngleMotor(a), Rotate.Z_AXIS));
                 }
                 break;
-            default:
-                if(!madgickAngle)
-                    madgickAngle = true;
         }
     }
 
@@ -199,21 +194,6 @@ public class Main extends Application {
         return new Affine(-matrix[0][0], -matrix[0][1], -matrix[0][2], 0,
                           matrix[1][0], matrix[1][1], matrix[1][2], 0,
                           matrix[2][0], matrix[2][1], matrix[2][2], 0);
-    }
-
-    private double calculateAngleMotor(float[] quaternion) {
-        double quaternProd = (lastQuaternion[0] * quaternion[0]) -
-                (lastQuaternion[1] * -quaternion[1]) -
-                (lastQuaternion[2] * -quaternion[2]) -
-                (lastQuaternion[3] * -quaternion[3]);
-
-        if(madgickAngle) {
-            for (int i = 0; i < 4; i++) {
-                lastQuaternion[i] = quaternion[i];
-            }
-            madgickAngle = false;
-        }
-        return Math.toDegrees(2 * Math.acos(quaternProd));
     }
 
     public static double[][] trasposeMatrix(double[][] matrix) {
@@ -256,16 +236,16 @@ public class Main extends Application {
         }
 
         pointLight = new PointLight(lightColor);
-        pointLight.setTranslateX(VIEWPORT_SIZE*3/4);
-        pointLight.setTranslateY(VIEWPORT_SIZE/2);
-        pointLight.setTranslateZ(VIEWPORT_SIZE/2);
+        pointLight.setTranslateX(VIEWPORT_SIZE * 3 / 4);
+        pointLight.setTranslateY(VIEWPORT_SIZE / 2);
+        pointLight.setTranslateZ(VIEWPORT_SIZE / 2);
         PointLight pointLight2 = new PointLight(lightColor);
-        pointLight2.setTranslateX(VIEWPORT_SIZE*1/4);
-        pointLight2.setTranslateY(VIEWPORT_SIZE*3/4);
-        pointLight2.setTranslateZ(VIEWPORT_SIZE*3/4);
+        pointLight2.setTranslateX(VIEWPORT_SIZE * 1 / 4);
+        pointLight2.setTranslateY(VIEWPORT_SIZE * 3 / 4);
+        pointLight2.setTranslateZ(VIEWPORT_SIZE * 3 / 4);
         PointLight pointLight3 = new PointLight(lightColor);
-        pointLight3.setTranslateX(VIEWPORT_SIZE*5/8);
-        pointLight3.setTranslateY(VIEWPORT_SIZE/2);
+        pointLight3.setTranslateX(VIEWPORT_SIZE * 5 / 8);
+        pointLight3.setTranslateY(VIEWPORT_SIZE / 2);
         pointLight3.setTranslateZ(0);
 
         Color ambientColor = Color.rgb(80, 80, 80, 0);

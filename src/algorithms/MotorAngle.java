@@ -29,9 +29,9 @@ public class MotorAngle implements Algorithm {
         if(accel[0] < 0)
             sB = -sB;
 
-        double w = Math.sqrt(Math.pow(values[6], 2) + Math.pow(values[7], 2));
+        double w = Math.sqrt(Math.pow(-values[6], 2) + Math.pow(-values[7], 2));
 
-        if(values[7] < 0)
+        if(-values[7] < 0)
             w = -w;
 
         double betaAcc = Math.atan2(sB, accel[2]);

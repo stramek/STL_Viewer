@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class Main extends Application {
 
     private static final String MESH_FILENAME =
-            "silnik.stl";
+            "model.stl";
 
     private static final double MODEL_SCALE_FACTOR = 0.5; //2
     private static final double MODEL_X_OFFSET = 0; // -30
@@ -42,8 +42,6 @@ public class Main extends Application {
     private PointLight pointLight;
 
     private MeshView[] meshViews;
-
-    private double[] lastQuaternion;
 
     private Group group;
 
@@ -268,18 +266,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        lastQuaternion = new double[4];
-        for(double d : lastQuaternion) d = 0;
-
-        lastQuaternion = new double[4];
-        for(double d : lastQuaternion) d = 0;
 
         group = buildScene();
         group.setScaleX(2);
         group.setScaleY(2);
         group.setScaleZ(2);
-        //group.setTranslateX(50);
-        //group.setTranslateY(50);
 
         Scene scene = new Scene(group, VIEWPORT_SIZE, VIEWPORT_SIZE, true);
         scene.setFill(Color.rgb(10, 10, 40));

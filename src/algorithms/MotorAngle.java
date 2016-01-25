@@ -50,7 +50,7 @@ public class MotorAngle implements Algorithm {
         if(beta < -Math.PI)
             beta = (float) (beta + 2 * Math.PI);
 
-        float[] ret = { (float)Math.toDegrees(beta) };
+        float[] ret = { -(float)Math.toDegrees(beta) };
         return ret;
     }
 }
